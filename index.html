@@ -142,7 +142,16 @@ $('#fileInput').addEventListener('change',handleFile);
 $('#fileInputLanding').addEventListener('change',handleFile);
 
 // ── Boot ──
-(async()=>{const d=await loadData().catch(()=>null);if(d&&d.length){allLetters=d;init()}})();
+(async()=>{
+  // 1. Try IndexedDB cache first
+  const d=await loadData().catch(()=>null);
+  if(d&&d.length){allLetters=d;init();return}
+  // 2. Try fetching JSON from same directory (GitHub Pages)
+  try{
+    const resp=await fetch('letters_jp_final_with_paintings.json');
+    if(resp.ok){const data=await resp.json();allLetters=data;await saveData(data);init();return}
+  }catch(e){}
+})();
 
 function init(){
   $('#landing').classList.add('hidden');
